@@ -1,0 +1,6 @@
+{
+  "name": "Shadow Combat: Shinobi 2D",
+  "description": "2D shadow silhouette martial arts fighting game inspired by Shadow Fight 2 with weapons, combos, special shadow abilities, and demon boss battles.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

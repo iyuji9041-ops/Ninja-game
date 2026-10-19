@@ -1,0 +1,44 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Crossed Katana Blades -->
+    <path
+        android:fillColor="#E0E6ED"
+        android:pathData="M26,30 L82,86 L78,90 L22,34 Z" />
+    <path
+        android:fillColor="#00E5FF"
+        android:pathData="M24,28 L34,38 L30,42 L20,32 Z" />
+    <path
+        android:fillColor="#E0E6ED"
+        android:pathData="M82,30 L26,86 L22,90 L78,34 Z" />
+    <path
+        android:fillColor="#00E5FF"
+        android:pathData="M84,28 L74,38 L78,42 L88,32 Z" />
+
+    <!-- Ninja Head & Cowl Silhouette -->
+    <path
+        android:fillColor="#111116"
+        android:pathData="M54,26 C43,26 36,33 36,44 C36,54 42,62 54,64 C66,62 72,54 72,44 C72,33 65,26 54,26 Z" />
+    <!-- Ninja Scarf Ends Flowing -->
+    <path
+        android:fillColor="#B8253E"
+        android:pathData="M54,58 L32,68 L36,74 L54,63 L72,74 L76,68 Z" />
+    <path
+        android:fillColor="#D83152"
+        android:pathData="M34,70 C24,78 20,92 18,98 L24,96 C27,88 32,80 38,75 Z" />
+
+    <!-- Ninja Shoulders / Torso Silhouette -->
+    <path
+        android:fillColor="#14141A"
+        android:pathData="M30,68 C22,76 18,88 18,94 L90,94 C90,88 86,76 78,68 C70,74 62,76 54,76 C46,76 38,74 30,68 Z" />
+
+    <!-- Glowing Ninja Eyes (Shadow Fight Visor) -->
+    <path
+        android:fillColor="#00E5FF"
+        android:pathData="M43,44 L50,47 L43,48 Z" />
+    <path
+        android:fillColor="#00E5FF"
+        android:pathData="M65,44 L58,47 L65,48 Z" />
+</vector>
