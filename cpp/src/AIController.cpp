@@ -12,6 +12,7 @@ void AIController::reset() {
 }
 
 void AIController::update(Fighter& ai, const Fighter& player, const BossProfile* boss, float dt, float arenaWidth) {
+    (void)arenaWidth;
     if (ai.health <= 0.0f || !ai.canPerformAction()) return;
 
     decisionTimer -= dt;
@@ -50,6 +51,7 @@ void AIController::update(Fighter& ai, const Fighter& player, const BossProfile*
 }
 
 void AIController::decideNextMove(Fighter& ai, const Fighter& player, const BossProfile* boss, float dist) {
+    (void)boss;
     float optimalRange = 75.0f * ai.weapon.rangeMultiplier;
     float r = static_cast<float>(rand()) / RAND_MAX;
 

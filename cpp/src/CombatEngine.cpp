@@ -118,6 +118,7 @@ void CombatEngine::update(float dt) {
 }
 
 void CombatEngine::updateFighterPhysics(Fighter& f, const Fighter& opponent, float dt) {
+    (void)opponent;
     // Action Animation Frame Progression
     if (f.actionState != ActionState::IDLE) {
         f.actionTime += dt;
@@ -190,7 +191,6 @@ void CombatEngine::checkAttackHit(Fighter& attacker, Fighter& defender) {
 
         // Base damage calculation
         float baseDmg = attacker.weapon.baseDamage;
-        float speedMod = attacker.weapon.attackSpeedMultiplier;
         float knockback = 14.0f;
         HitType hitType = HitType::NORMAL;
 
