@@ -9,6 +9,7 @@ import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.translate
 import com.example.game.model.ArenaType
+import kotlin.math.cos
 import kotlin.math.sin
 
 /**
@@ -35,12 +36,19 @@ class ArenaRenderCache {
     var gatesEclipseBrush: Brush? = null
     var gatesGroundBrush: Brush? = null
 
+    // Cached Brushes: Moonlit Temple
+    var moonlitSkyBrush: Brush? = null
+    var moonlitMoonBrush: Brush? = null
+    var moonlitGroundBrush: Brush? = null
+
     // Cached Paths
     val mountainPath = Path()
     val pineTrunkPath = Path()
     val toriiTopBeamPath = Path()
     val pagodaRoofPaths = Array(4) { Path() }
     val pillarPath = Path()
+    val templeRoofPath = Path()
+    val stoneLanternPath = Path()
 
     fun updateCacheIfNeeded(w: Float, h: Float, groundY: Float) {
         if (w == cachedWidth && h == cachedHeight && groundY == cachedGroundY) return
@@ -112,6 +120,28 @@ class ArenaRenderCache {
             endY = h
         )
 
+        // 4. Moonlit Temple Brushes
+        moonlitSkyBrush = Brush.verticalGradient(
+            colors = listOf(
+                Color(0xFF050B18),
+                Color(0xFF0C1935),
+                Color(0xFF162B54),
+                Color(0xFF203F74),
+                Color(0xFF38639F)
+            ),
+            startY = 0f,
+            endY = groundY
+        )
+        moonlitGroundBrush = Brush.verticalGradient(
+            colors = listOf(
+                Color(0xFF1C2133),
+                Color(0xFF121624),
+                Color(0xFF080B13)
+            ),
+            startY = groundY,
+            endY = h
+        )
+
         // Precompute Mountain Path
         mountainPath.reset()
         mountainPath.moveTo(-w * 0.5f, groundY)
@@ -168,6 +198,28 @@ class ArenaRenderCache {
         pillarPath.lineTo(12f, -pillarHeight + 15f)
         pillarPath.lineTo(22f, 0f)
         pillarPath.close()
+
+        // Precompute Temple Roof Path (Traditional Sweeping Eaves)
+        val roofSpan = 220f
+        val roofRise = 42f
+        templeRoofPath.reset()
+        templeRoofPath.moveTo(-roofSpan / 2, 0f)
+        templeRoofPath.quadraticTo(-roofSpan * 0.25f, -roofRise * 0.3f, 0f, -roofRise)
+        templeRoofPath.quadraticTo(roofSpan * 0.25f, -roofRise * 0.3f, roofSpan / 2, 0f)
+        templeRoofPath.quadraticTo(roofSpan * 0.22f, 12f, 0f, 15f)
+        templeRoofPath.quadraticTo(-roofSpan * 0.22f, 12f, -roofSpan / 2, 0f)
+        templeRoofPath.close()
+
+        // Precompute Stone Toro Lantern Path
+        stoneLanternPath.reset()
+        stoneLanternPath.moveTo(-8f, 0f)
+        stoneLanternPath.lineTo(-5f, -32f)
+        stoneLanternPath.lineTo(-14f, -36f)
+        stoneLanternPath.lineTo(0f, -48f)
+        stoneLanternPath.lineTo(14f, -36f)
+        stoneLanternPath.lineTo(5f, -32f)
+        stoneLanternPath.lineTo(8f, 0f)
+        stoneLanternPath.close()
     }
 }
 
@@ -193,6 +245,7 @@ object ArenaRenderer {
                 ArenaType.CRIMSON_PAGODA -> drawCrimsonPagoda(width, height, groundY, cameraX, gameTime)
                 ArenaType.BAMBOO_GROVE -> drawBambooGrove(width, height, groundY, cameraX, gameTime)
                 ArenaType.GATES_OF_SHADOWS -> drawGatesOfShadows(width, height, groundY, cameraX, gameTime)
+                ArenaType.MOONLIT_TEMPLE -> drawMoonlitTemple(width, height, groundY, cameraX, gameTime)
             }
         }
     }
@@ -209,7 +262,7 @@ object ArenaRenderer {
             drawRect(brush = brush, size = Size(w, groundY))
         }
 
-        // Giant Blood Red Sun
+        // Giant Blood Red Sun with luminous corona
         val sunX = w * 0.5f - cameraX * 0.05f
         val sunY = groundY * 0.48f
         val sunRadius = h * 0.22f
@@ -222,10 +275,10 @@ object ArenaRenderer {
                     Color(0x00000000)
                 ),
                 center = Offset(sunX, sunY),
-                radius = sunRadius * 1.4f
+                radius = sunRadius * 1.5f
             ),
             center = Offset(sunX, sunY),
-            radius = sunRadius * 1.4f
+            radius = sunRadius * 1.5f
         )
         drawCircle(
             color = Color(0xFFFF523B),
@@ -262,9 +315,12 @@ object ArenaRenderer {
             strokeWidth = 4f
         )
 
-        // Hanging lanterns glow
+        // Hanging lanterns with pulsating flame aura
         drawLantern(pagodaX - 50f, groundY - 140f, time)
         drawLantern(pagodaX + 50f, groundY - 140f, time)
+
+        // Dynamic drifting Sakura / Momiji leaves blowing across the wind
+        drawSakuraWindDrift(w, groundY, cameraX, time)
     }
 
     private fun DrawScope.drawBambooGrove(
@@ -279,7 +335,7 @@ object ArenaRenderer {
             drawRect(brush = brush, size = Size(w, groundY))
         }
 
-        // Glowing Full Moon
+        // Glowing Full Moon with luminous rings
         val moonX = w * 0.32f - cameraX * 0.04f
         val moonY = groundY * 0.35f
         val moonRadius = h * 0.14f
@@ -292,10 +348,10 @@ object ArenaRenderer {
                     Color(0x00000000)
                 ),
                 center = Offset(moonX, moonY),
-                radius = moonRadius * 2.2f
+                radius = moonRadius * 2.3f
             ),
             center = Offset(moonX, moonY),
-            radius = moonRadius * 2.2f
+            radius = moonRadius * 2.3f
         )
         drawCircle(
             color = Color(0xFFF0FCFF),
@@ -353,6 +409,9 @@ object ArenaRenderer {
             end = Offset(w, groundY),
             strokeWidth = 3f
         )
+
+        // Dynamic floating glowing fireflies
+        drawBambooFireflies(w, groundY, time)
     }
 
     private fun DrawScope.drawGatesOfShadows(
@@ -371,6 +430,7 @@ object ArenaRenderer {
         val eclipseX = w * 0.5f - cameraX * 0.05f
         val eclipseY = groundY * 0.38f
         val eclipseRadius = h * 0.16f
+        val pulse = sin(time * 3f) * 0.08f + 1f
         drawCircle(
             brush = Brush.radialGradient(
                 colors = listOf(
@@ -380,12 +440,12 @@ object ArenaRenderer {
                     Color(0x00000000)
                 ),
                 center = Offset(eclipseX, eclipseY),
-                radius = eclipseRadius * 2.5f
+                radius = eclipseRadius * 2.6f * pulse
             ),
             center = Offset(eclipseX, eclipseY),
-            radius = eclipseRadius * 2.5f
+            radius = eclipseRadius * 2.6f * pulse
         )
-        // Black disk
+        // Black eclipse disk
         drawCircle(
             color = Color(0xFF08040C),
             center = Offset(eclipseX, eclipseY),
@@ -400,7 +460,7 @@ object ArenaRenderer {
 
         // Massive Demonic Torii Gate in Background using cached Path
         val gateX = w * 0.5f - cameraX * 0.2f
-        drawDemonToriiGate(gateX, groundY, h * 0.65f)
+        drawDemonToriiGate(gateX, groundY, h * 0.65f, time)
 
         // Jagged Obsidian Pillars using cached Path
         drawPillar(w * 0.15f - cameraX * 0.35f, groundY)
@@ -420,6 +480,101 @@ object ArenaRenderer {
             end = Offset(w, groundY),
             strokeWidth = 3f
         )
+
+        // Demonic rising shadow flames / embers
+        drawRisingShadowFlames(w, groundY, time)
+    }
+
+    private fun DrawScope.drawMoonlitTemple(
+        w: Float,
+        h: Float,
+        groundY: Float,
+        cameraX: Float,
+        time: Float
+    ) {
+        // Sky: Midnight Indigo to Silver Mist
+        cache.moonlitSkyBrush?.let { brush ->
+            drawRect(brush = brush, size = Size(w, groundY))
+        }
+
+        // Giant Pearl Moon behind temple rooftop
+        val moonX = w * 0.65f - cameraX * 0.04f
+        val moonY = groundY * 0.36f
+        val moonRadius = h * 0.24f
+
+        // Multi-tier Lunar Halo
+        drawCircle(
+            brush = Brush.radialGradient(
+                colors = listOf(
+                    Color(0xFFE3F2FD),
+                    Color(0x9990CAF9),
+                    Color(0x4442A5F5),
+                    Color(0x00000000)
+                ),
+                center = Offset(moonX, moonY),
+                radius = moonRadius * 2.2f
+            ),
+            center = Offset(moonX, moonY),
+            radius = moonRadius * 2.2f
+        )
+        // Solid Moon Disk
+        drawCircle(
+            color = Color(0xFFF5F9FF),
+            center = Offset(moonX, moonY),
+            radius = moonRadius
+        )
+        // Soft crater shading on moon surface
+        drawCircle(
+            color = Color(0x2280A4C4),
+            center = Offset(moonX - moonRadius * 0.25f, moonY - moonRadius * 0.2f),
+            radius = moonRadius * 0.32f
+        )
+        drawCircle(
+            color = Color(0x1A80A4C4),
+            center = Offset(moonX + moonRadius * 0.3f, moonY + moonRadius * 0.15f),
+            radius = moonRadius * 0.42f
+        )
+
+        // Drifting Moonlight Clouds across the sky
+        drawMoonlitClouds(w, groundY, cameraX, time)
+
+        // Distant Pagoda Spire Silhouette against the moon (Right)
+        val spireX = w * 0.78f - cameraX * 0.15f
+        drawPagodaSilhouette(spireX, groundY, h * 0.48f)
+
+        // Main Ancient Temple Rooftop Silhouette (Left & Center)
+        val templeX = w * 0.28f - cameraX * 0.28f
+        drawTempleRoof(templeX, groundY, h * 0.42f)
+
+        // Weathered Temple Roof Tile Floor (Ground)
+        cache.moonlitGroundBrush?.let { brush ->
+            drawRect(
+                brush = brush,
+                topLeft = Offset(0f, groundY),
+                size = Size(w, h - groundY)
+            )
+        }
+        // Silver-cyan moonlit roof ridge line
+        drawLine(
+            color = Color(0xFF76D7EA),
+            start = Offset(0f, groundY),
+            end = Offset(w, groundY),
+            strokeWidth = 3.5f
+        )
+        // Roof tile seam lines
+        for (i in 0 until (w / 35f).toInt()) {
+            val tx = i * 35f
+            drawLine(
+                color = Color(0xFF141824),
+                start = Offset(tx, groundY),
+                end = Offset(tx - 25f, h),
+                strokeWidth = 2f
+            )
+        }
+
+        // Mystical Stone Toro Lanterns on Rooftop
+        drawStoneLantern(w * 0.16f - cameraX * 0.35f, groundY, time)
+        drawStoneLantern(w * 0.85f - cameraX * 0.35f, groundY, time + 1.5f)
     }
 
     private fun DrawScope.drawPagodaSilhouette(centerX: Float, groundY: Float, height: Float) {
@@ -450,6 +605,156 @@ object ArenaRenderer {
         }
     }
 
+    private fun DrawScope.drawTempleRoof(centerX: Float, groundY: Float, height: Float) {
+        val templeColor = Color(0xFF0C101C)
+        translate(left = centerX, top = groundY) {
+            // Main wide sweeping upper roof
+            translate(left = 0f, top = -height) {
+                drawPath(cache.templeRoofPath, color = templeColor)
+            }
+            // Ridge beam
+            drawRect(
+                color = templeColor,
+                topLeft = Offset(-110f, -height + 15f),
+                size = Size(220f, height * 0.5f)
+            )
+            // Lower eaves
+            translate(left = 0f, top = -height * 0.45f) {
+                drawPath(cache.templeRoofPath, color = templeColor)
+            }
+            // Supporting columns
+            drawRect(
+                color = templeColor,
+                topLeft = Offset(-80f, -height * 0.45f),
+                size = Size(160f, height * 0.45f)
+            )
+            // Traditional paper shoji window silhouette
+            drawRect(
+                color = Color(0xFF162540),
+                topLeft = Offset(-45f, -height * 0.35f),
+                size = Size(90f, height * 0.3f)
+            )
+            drawLine(
+                color = Color(0xFF0C101C),
+                start = Offset(0f, -height * 0.35f),
+                end = Offset(0f, -height * 0.05f),
+                strokeWidth = 3f
+            )
+        }
+    }
+
+    private fun DrawScope.drawStoneLantern(x: Float, groundY: Float, time: Float) {
+        val lanternColor = Color(0xFF0D121E)
+        translate(left = x, top = groundY) {
+            drawPath(cache.stoneLanternPath, color = lanternColor)
+            // Glowing interior flame (Spiritual Teal Cyan)
+            val flicker = sin(time * 7f) * 0.2f + 0.8f
+            drawCircle(
+                color = Color(0xFF00E5FF).copy(alpha = 0.35f * flicker),
+                center = Offset(0f, -24f),
+                radius = 18f
+            )
+            drawCircle(
+                color = Color(0xFFE0F7FA),
+                center = Offset(0f, -24f),
+                radius = 5f
+            )
+        }
+    }
+
+    private fun DrawScope.drawMoonlitClouds(
+        w: Float,
+        groundY: Float,
+        cameraX: Float,
+        time: Float
+    ) {
+        val cloudColor = Color(0x334B6E9C)
+        val numClouds = 5
+        for (i in 0 until numClouds) {
+            val cx = ((i * 240f + time * 12f) - cameraX * 0.1f) % (w + 200f) - 100f
+            val cy = groundY * (0.18f + i * 0.12f)
+            val cw = 160f + (i % 3) * 40f
+            drawOval(
+                color = cloudColor,
+                topLeft = Offset(cx, cy),
+                size = Size(cw, 32f)
+            )
+            drawOval(
+                color = cloudColor,
+                topLeft = Offset(cx + 35f, cy - 14f),
+                size = Size(cw * 0.6f, 30f)
+            )
+        }
+    }
+
+    private fun DrawScope.drawSakuraWindDrift(
+        w: Float,
+        groundY: Float,
+        cameraX: Float,
+        time: Float
+    ) {
+        val numLeaves = 14
+        for (i in 0 until numLeaves) {
+            val progress = ((time * 0.45f + i * 0.07f) % 1.0f)
+            val lx = (progress * (w + 120f) - 60f - cameraX * 0.2f) % (w + 120f)
+            val ly = (progress * groundY + sin(time * 3f + i * 1.5f) * 24f) % groundY
+            val rot = sin(time * 4f + i) * 8f
+            val leafColor = if (i % 2 == 0) Color(0xFFFF5277) else Color(0xFFFF8DA1)
+
+            drawOval(
+                color = leafColor.copy(alpha = 0.85f),
+                topLeft = Offset(lx, ly),
+                size = Size(10f, 6f)
+            )
+        }
+    }
+
+    private fun DrawScope.drawBambooFireflies(
+        w: Float,
+        groundY: Float,
+        time: Float
+    ) {
+        val numFireflies = 12
+        for (i in 0 until numFireflies) {
+            val fx = ((i * (w / 11f) + cos(time * 1.2f + i * 2f) * 35f) % w)
+            val fy = (groundY * 0.4f + sin(time * 1.5f + i * 1.7f) * (groundY * 0.35f))
+            val pulse = (sin(time * 4f + i * 3f) * 0.5f + 0.5f).coerceIn(0.1f, 1f)
+            val glowColor = Color(0xFF64FFDA).copy(alpha = 0.5f * pulse)
+
+            drawCircle(
+                color = glowColor,
+                center = Offset(fx, fy),
+                radius = 12f * pulse
+            )
+            drawCircle(
+                color = Color(0xFFE8F5E9),
+                center = Offset(fx, fy),
+                radius = 2.5f
+            )
+        }
+    }
+
+    private fun DrawScope.drawRisingShadowFlames(
+        w: Float,
+        groundY: Float,
+        time: Float
+    ) {
+        val numEmbers = 16
+        for (i in 0 until numEmbers) {
+            val p = ((time * 0.6f + i * 0.06f) % 1.0f)
+            val ex = (i * (w / 15f) + sin(time * 3f + i) * 20f) % w
+            val ey = groundY - (p * groundY * 0.85f)
+            val alpha = (1f - p).coerceIn(0f, 1f)
+            val emberColor = if (i % 2 == 0) Color(0xFFE040FB) else Color(0xFFFF1744)
+
+            drawCircle(
+                color = emberColor.copy(alpha = alpha * 0.8f),
+                center = Offset(ex, ey),
+                radius = 3.5f * (1f - p * 0.5f)
+            )
+        }
+    }
+
     private fun DrawScope.drawGnarledPine(x: Float, groundY: Float, height: Float) {
         val treeColor = Color(0xFF14080F)
 
@@ -474,7 +779,7 @@ object ArenaRenderer {
         }
     }
 
-    private fun DrawScope.drawDemonToriiGate(centerX: Float, groundY: Float, height: Float) {
+    private fun DrawScope.drawDemonToriiGate(centerX: Float, groundY: Float, height: Float, time: Float) {
         val gateColor = Color(0xFF0F0615)
         val postSpacing = 160f
         val topY = groundY - height
@@ -503,11 +808,22 @@ object ArenaRenderer {
             size = Size(postSpacing + 70f, 16f)
         )
 
-        // Glowing Rune in center
+        // Glowing Demon Rune in center with demonic eye pulse
+        val runePulse = sin(time * 5f) * 0.3f + 0.7f
+        drawCircle(
+            color = Color(0xFFE040FB).copy(alpha = 0.4f * runePulse),
+            center = Offset(centerX, topY + 30f),
+            radius = 24f * runePulse
+        )
         drawCircle(
             color = Color(0xFFE040FB),
             center = Offset(centerX, topY + 30f),
             radius = 12f
+        )
+        drawCircle(
+            color = Color(0xFFFF1744),
+            center = Offset(centerX, topY + 30f),
+            radius = 5f
         )
     }
 

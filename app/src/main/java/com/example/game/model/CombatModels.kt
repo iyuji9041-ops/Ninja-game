@@ -46,7 +46,8 @@ enum class HitType {
 enum class ArenaType {
     CRIMSON_PAGODA,
     BAMBOO_GROVE,
-    GATES_OF_SHADOWS
+    GATES_OF_SHADOWS,
+    MOONLIT_TEMPLE
 }
 
 enum class GameMode {
@@ -125,7 +126,9 @@ enum class ParticleType {
     SHADOW_SMOKE,
     CHERRY_LEAF,
     FIREFLY,
-    SHOCKWAVE
+    SHOCKWAVE,
+    DUST_CLOUD,
+    SLASH_SPARK
 }
 
 data class Particle(

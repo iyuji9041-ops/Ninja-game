@@ -406,6 +406,27 @@ private fun BossDuelCard(
                 )
             }
 
+            // Arena Badge
+            val arenaLabel = when (boss.arena) {
+                com.example.game.model.ArenaType.CRIMSON_PAGODA -> "⛩️ Crimson Pagoda"
+                com.example.game.model.ArenaType.BAMBOO_GROVE -> "🎋 Bamboo Grove"
+                com.example.game.model.ArenaType.GATES_OF_SHADOWS -> "👁️ Gates of Shadows"
+                com.example.game.model.ArenaType.MOONLIT_TEMPLE -> "🏯 Moonlit Temple"
+            }
+            Surface(
+                color = Color(0x33281E38),
+                shape = RoundedCornerShape(6.dp),
+                border = androidx.compose.foundation.BorderStroke(0.5.dp, Color(0xFF5A4474))
+            ) {
+                Text(
+                    text = arenaLabel,
+                    fontSize = 10.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = SoulCyan,
+                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
+                )
+            }
+
             // Fight Button
             Button(
                 onClick = onFight,

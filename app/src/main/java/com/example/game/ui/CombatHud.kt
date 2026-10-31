@@ -256,13 +256,18 @@ private fun FighterHealthCard(
         )
 
         // Health Bar with Delayed Damage Trail
+        val isCriticalHp = hpFraction < 0.25f
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(15.dp)
+                .height(16.dp)
                 .clip(RoundedCornerShape(4.dp))
                 .background(Color(0xFF22162B))
-                .border(1.dp, Color(0xFF4A3459), RoundedCornerShape(4.dp))
+                .border(
+                    width = if (isCriticalHp) 1.5.dp else 1.dp,
+                    color = if (isCriticalHp) Color(0xFFFF1744) else Color(0xFF4A3459),
+                    shape = RoundedCornerShape(4.dp)
+                )
         ) {
             // Layer 1 (Behind): Damage Trail (Gold/Amber)
             Box(
@@ -318,15 +323,22 @@ private fun FighterHealthCard(
 
 @Composable
 private fun RoundGems(roundsWon: Int) {
-    Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+    Row(horizontalArrangement = Arrangement.spacedBy(5.dp), verticalAlignment = Alignment.CenterVertically) {
         for (i in 1..2) {
             val won = roundsWon >= i
             Box(
                 modifier = Modifier
-                    .size(10.dp)
-                    .clip(CircleShape)
-                    .background(if (won) GoldYellow else Color(0xFF382D4A))
-                    .border(1.dp, if (won) Color(0xFFFFE082) else Color(0xFF4D3E64), CircleShape)
+                    .size(11.dp)
+                    .clip(RoundedCornerShape(3.dp))
+                    .background(
+                        if (won) Brush.radialGradient(listOf(Color(0xFFFFF176), GoldYellow, Color(0xFFFF8F00)))
+                        else Brush.linearGradient(listOf(Color(0xFF2E223D), Color(0xFF1D1429)))
+                    )
+                    .border(
+                        1.dp,
+                        if (won) Color(0xFFFFE082) else Color(0xFF4D3E64),
+                        RoundedCornerShape(3.dp)
+                    )
             )
         }
     }
@@ -377,27 +389,63 @@ fun AnnouncerOverlay(
             }
         }
 
-        // Live Combo Counter on Left
+        // Live Combo Rating Banner on Left
         if (comboCount > 1) {
+            val rankTitle = when {
+                comboCount >= 6 -> "SHADOW MASTER!"
+                comboCount == 5 -> "UNSTOPPABLE!"
+                comboCount == 4 -> "BRUTAL!"
+                comboCount == 3 -> "GREAT!"
+                else -> "NICE!"
+            }
+            val rankColor = when {
+                comboCount >= 6 -> Color(0xFFE040FB)
+                comboCount == 5 -> Color(0xFFFF1744)
+                comboCount == 4 -> FlameAmber
+                comboCount == 3 -> GoldYellow
+                else -> SoulCyan
+            }
+
             Box(
                 modifier = Modifier
                     .align(Alignment.CenterStart)
-                    .offset(x = 36.dp, y = (-36).dp)
+                    .offset(x = 28.dp, y = (-32).dp)
             ) {
-                Column {
-                    Text(
-                        text = "COMBO",
-                        fontSize = 13.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color(0xFFA59EB3),
-                        letterSpacing = 2.sp
-                    )
-                    Text(
-                        text = "x$comboCount",
-                        fontSize = 32.sp,
-                        fontWeight = FontWeight.Black,
-                        color = FlameAmber
-                    )
+                Surface(
+                    color = Color(0xD90D0716),
+                    shape = RoundedCornerShape(10.dp),
+                    border = androidx.compose.foundation.BorderStroke(1.5.dp, rankColor),
+                    shadowElevation = 8.dp
+                ) {
+                    Column(
+                        modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp),
+                        horizontalAlignment = Alignment.Start
+                    ) {
+                        Text(
+                            text = rankTitle,
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Black,
+                            color = rankColor,
+                            letterSpacing = 1.5.sp
+                        )
+                        Row(verticalAlignment = Alignment.Bottom) {
+                            Text(
+                                text = "COMBO",
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color(0xFFB0A4C8),
+                                letterSpacing = 1.sp,
+                                modifier = Modifier.padding(bottom = 3.dp)
+                            )
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text(
+                                text = "x$comboCount",
+                                fontSize = 32.sp,
+                                fontWeight = FontWeight.Black,
+                                color = Color.White
+                            )
+                        }
+                    }
                 }
             }
         }

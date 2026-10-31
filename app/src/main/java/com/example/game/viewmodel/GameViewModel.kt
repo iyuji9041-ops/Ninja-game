@@ -259,7 +259,7 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
             shadowMoveName = "Lightning Naginata",
             eyeColor = GoldYellow,
             ribbonColor = FlameAmber,
-            arena = ArenaType.CRIMSON_PAGODA,
+            arena = ArenaType.MOONLIT_TEMPLE,
             rewardCoins = 750,
             quote = "Patience and distance conquer all arrogance."
         ),
