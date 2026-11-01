@@ -20,3 +20,4 @@ cpp/*.o
 cpp/src/*.o
 cpp/shadow_combat_cpp
 cpp/test_combat
+attachments/
