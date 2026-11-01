@@ -240,14 +240,14 @@ fun CombatScreen(viewModel: GameViewModel) {
             ArenaRenderer.drawArena(this, arena, cameraOffset, gameTime)
 
             // 2. Draw Projectiles (Flying Shurikens scaled by u)
-            ShadowRenderer.drawProjectiles(this, viewModel.combatEngine.projectiles, u)
+            ShadowRenderer.drawProjectiles(this, viewModel.combatEngine.projectiles, groundY, u)
 
             // 3. Draw Fighters (Articulated Silhouettes scaled by u to 35-40% screen height)
             ShadowRenderer.drawFighter(this, viewModel.playerFighter, groundY, gameTime, u)
             ShadowRenderer.drawFighter(this, viewModel.enemyFighter, groundY, gameTime, u)
 
             // 4. Draw Combat Particles (Sparks, blood mist, shadow smoke scaled by u)
-            ShadowRenderer.drawParticles(this, viewModel.combatEngine.particles, u)
+            ShadowRenderer.drawParticles(this, viewModel.combatEngine.particles, groundY, u)
         }
 
         // Floating Damage Text Numbers updating live with frameTick

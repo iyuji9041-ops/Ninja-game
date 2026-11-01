@@ -158,6 +158,7 @@ data class Fighter(
     var x: Float,
     var y: Float = 0f, // 0 is ground level, positive is jumping
     var vy: Float = 0f,
+    var vx: Float = 0f,
     var facingRight: Boolean = true,
     var health: Float = 100f,
     var maxHealth: Float = 100f,
